@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexInvest AI - Financial AI Investment Copilot</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- LEFT SIDEBAR -->
+    <div class="sidebar">
+        <div class="logo">⚡ NexInvest AI</div>
+
+
+        <div class="user-profile-card">
+            <div style="font-weight: 600; color: #fff;">User Profile</div>
+            <div style="color: #94a3b8; font-size: 11px; margin-top: 2px;">Risk Tolerance</div>
+            <span class="badge-green">Conservative</span>
+        </div>
+    </div>
+
+    <!-- MAIN WRAPPER -->
+    <div class="main-wrapper">
+        <!-- TOP NAVBAR -->
+        <div class="top-navbar">
+            <div class="search-container">
+                🔍
+                <input type="text" id="ticker-input" value="RELIANCE" placeholder="Search Ticker (e.g. RELIANCE, TCS)...">
+            </div>
+            <button class="btn-run" onclick="triggerAnalysis()">Run Pipeline</button>
+        </div>
+
+        <!-- DASHBOARD CONTENT -->
+        <div class="dashboard-body">
+            
+            <!-- LEFT COLUMN -->
+            <div class="content-left">
+                
+                <!-- STOCK HEADER -->
+                <div class="stock-header">
+                    <div class="stock-title">
+                        <h2 id="stock-name-display">RELIANCE <span style="font-size: 12px; color: #38bdf8; background: #18202f; padding: 2px 6px; border-radius: 4px;">NSE</span></h2>
+                        <div class="price-tag">₹ 2,974.10 <span style="font-size: 12px; color: #4ade80;">+1.93%</span></div>
+                    </div>
+                    <div style="text-align: right; color: #94a3b8; font-size: 11px;">
+                        <div>Day High: <span style="color: #4ade80;">2,985.00</span></div>
+                        <div>Day Low: <span style="color: #f87171;">2,950.20</span></div>
+                    </div>
+                </div>
+
+                <!-- AI AGENTS GRID -->
+                <div class="section-header">AI AGENTS ANALYSIS</div>
+                <div class="agents-grid">
+                    
+                    <!-- Technical Agent Card -->
+                    <div class="agent-card">
+                        <div class="agent-card-header">
+                            <span>📈</span> 1. TECHNICAL ANALYST
+                        </div>
+                        <pre id="technical-results" class="agent-output">Awaiting trigger...</pre>
+                    </div>
+
+                    <!-- Sentiment Agent Card -->
+                    <div class="agent-card">
+                        <div class="agent-card-header">
+                            <span>💬</span> 2. SENTIMENT ANALYST
+                        </div>
+                        <pre id="sentiment-results" class="agent-output">Awaiting trigger...</pre>
+                    </div>
+
+                </div>
+
+                <!-- SYNTHESIZED INSIGHT -->
+                <div class="section-header">SYNTHESIZED INSIGHT</div>
+                <div class="synthesis-card">
+                    <div style="font-weight: 700; color: #4ade80; margin-bottom: 6px;">CAUTIOUSLY POSITIVE (Pipeline Status)</div>
+                    <p style="color: #94a3b8; line-height: 1.5; font-size: 12px;">
+                        The multi-agent system evaluates technical price trends and news momentum concurrently. Outputs above reflect structured JSON signals generated directly by Groq LLMs.
+                    </p>
+                </div>
+
+            </div>
+
+            <!-- RIGHT COLUMN (WIDGETS) -->
+            <div class="content-right">
+                
+                <div class="widget-card">
+                    <div class="widget-title">Market Status</div>
+                    <div class="metric-row">
+                        <span>NIFTY 50</span>
+                        <span style="color: #4ade80;">24,834.85 (+0.81%)</span>
+                    </div>
+                    <div class="metric-row">
+                        <span>SENSEX</span>
+                        <span style="color: #4ade80;">81,330.56 (+0.75%)</span>
+                    </div>
+                </div>
+
+                <div class="widget-card">
+                    <div class="widget-title">Performance Metrics</div>
+                    <div class="metric-row">
+                        <span>Signal Accuracy</span>
+                        <span style="color: #fff;">88%</span>
+                    </div>
+                    <div class="metric-row">
+                        <span>Avg. Response Time</span>
+                        <span style="color: #fff;">3.4s</span>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- BACKEND INTEGRATION SCRIPT -->
+    <script>
+        // Update this with your active Ngrok URL from Google Colab
+        const NGROK_BASE_URL = "https://radish-division-reactor.ngrok-free.dev";
+
+        async function triggerAnalysis() {
+            const tickerInput = document.getElementById("ticker-input");
+            const ticker = tickerInput && tickerInput.value.trim() 
+                ? tickerInput.value.trim().toUpperCase() 
+                : "RELIANCE";
+
+            // Update UI Stock Display Title
+            document.getElementById("stock-name-display").innerHTML = `${ticker} <span style="font-size: 12px; color: #38bdf8; background: #18202f; padding: 2px 6px; border-radius: 4px;">NSE</span>`;
+
+            const techBox = document.getElementById("technical-results");
+            const sentBox = document.getElementById("sentiment-results");
+
+            if (techBox) techBox.innerText = "Analyzing technical market data...";
+            if (sentBox) sentBox.innerText = "Analyzing news sentiment...";
+
+            try {
+                const response = await fetch(`${NGROK_BASE_URL}/api/analyze`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "ngrok-skip-browser-warning": "true"
+                    },
+                    body: JSON.stringify({ ticker: ticker })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Server returned HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (data.status === "success") {
+                    if (techBox) {
+                        techBox.innerText = typeof data.technical === "string" 
+                            ? data.technical 
+                            : JSON.stringify(data.technical, null, 2);
+                    }
+                    if (sentBox) {
+                        sentBox.innerText = typeof data.sentiment === "string" 
+                            ? data.sentiment 
+                            : JSON.stringify(data.sentiment, null, 2);
+                    }
+                } else {
+                    alert("Pipeline Error: " + data.message);
+                    if (techBox) techBox.innerText = "Error loading technical data.";
+                    if (sentBox) sentBox.innerText = "Error loading sentiment data.";
+                }
+
+            } catch (err) {
+                console.error("Connection Error:", err);
+                alert("Failed to connect to Colab backend.\n\n1. Confirm the cell in Colab is currently running.\n2. Verify NGROK_BASE_URL matches the printed output.");
+                if (techBox) techBox.innerText = "Connection failed.";
+                if (sentBox) sentBox.innerText = "Connection failed.";
+            }
+        }
+    </script>
+</body>
+</html>
